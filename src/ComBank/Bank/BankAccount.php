@@ -33,7 +33,7 @@ class BankAccount implements BankAccountInterface
     {
         return $this->balance;
     }
-    private function setBalance($newBalance): void
+    public function setBalance($newBalance): void
     {
         $this->balance = $newBalance;
     }
