@@ -12,10 +12,13 @@ use ComBank\Exceptions\FailedTransactionException;
 use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 
-interface BankAccountInterface
+interface BankAccountInterface 
 {
-    const STATUS_OPEN = 'OPEN';
-    const STATUS_CLOSED = 'CLOSED';
+    public const STATUS_OPEN = 'OPEN';
+    public const STATUS_CLOSED = 'CLOSED';
 
-   
+   public function getBalance();
+   public function closeAccount();
+   public function reopenAccount();  
+   public function transaction(BankTransactionInterface $transaction) : void;
 }
