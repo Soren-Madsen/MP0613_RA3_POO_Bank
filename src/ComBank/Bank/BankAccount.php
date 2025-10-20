@@ -29,6 +29,10 @@ class BankAccount implements BankAccountInterface
         $this->status = BankAccountInterface::STATUS_OPEN;
 
     }
+    public function isOpen(): bool
+    {
+        return $this->status === BankAccountInterface::STATUS_OPEN;
+    }
     public function getBalance(): float
     {
         return $this->balance;
@@ -47,8 +51,13 @@ class BankAccount implements BankAccountInterface
     }
     public function transaction(BankTransactionInterface $transaction) : void
     {
-    $newBalance = $transaction->applyTransaction($this);
-    $this->setBalance( $newBalance);
+    if (! $this->isOpen()) {
     }
-   
+        try {
+            $newBalance = $transaction->applyTransaction($this);
+    $this->setBalance( $newBalance);
+    } catch (FailedTransactionException $e) {
+            throw new BankAccountException("Transaction failed: " . $e->getMessage());
+        }
+    }
 }
