@@ -26,13 +26,14 @@ pl('--------- [Start testing bank account #1, No overdraft] --------');
 try {
     $bankAccount1 = new BankAccount(initialBalance: 400.0);
     // show balance account
+    $bankAccount1->applyOverdraft(new NoOverdraft());
     pl('My balance : ' . $bankAccount1->getBalance());
     // close account
     $bankAccount1->closeAccount();
     pl('My account is now closed.');
     // reopen account
     $bankAccount1->reopenAccount();
-    pl('My account is now open.');
+    pl('My account is now reopen.');
     // deposit +150
     pl('Doing transaction deposit (+150) with current balance ' . $bankAccount1->getBalance());
     $bankAccount1->transaction(new DepositTransaction(150.0));
@@ -46,9 +47,6 @@ try {
     // withdrawal -600
     pl('Doing transaction withdrawal (-600) with current balance ' . $bankAccount1->getBalance());
     $bankAccount1->transaction(new WithdrawTransaction(600.0));
-
-}catch (InvalidOverdraftFundsException $e) {
-    pl($e->getMessage());
 } catch (ZeroAmountException $e) {
     pl($e->getMessage());
 } catch (BankAccountException $e) {
@@ -58,7 +56,8 @@ try {
 }
 
 pl('My balance after failed last transaction : ' . $bankAccount1->getBalance());
-
+$bankAccount1->closeAccount();
+pl('My account is now closed.');
 
 //---[Bank account 2]---/
 pl('--------- [Start testing bank account #2, Silver overdraft (100.0 funds)] --------');
@@ -85,7 +84,7 @@ try {
 
     // withdrawal -120
     pl('Doing transaction withdrawal (-120) with current balance ' . $bankAccount2->getBalance());
-    
+    $bankAccount2->transaction(new WithdrawTransaction(120.0));
 } catch (FailedTransactionException $e) {
     pl('Error transaction: ' . $e->getMessage());
 }
@@ -99,9 +98,5 @@ try {
 }
 pl('My new balance after withdrawal (-20) with funds : ' . $bankAccount2->getBalance());
 
-try {
-    $bankAccount2->transaction(new WithdrawTransaction(20.0));
-} catch (BankAccountException $e) {
-
-    pl($e->getMessage());
-}
+$bankAccount2->closeAccount();
+pl('My account is now closed.');

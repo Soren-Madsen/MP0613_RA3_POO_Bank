@@ -9,6 +9,7 @@
 
 use ComBank\Bank\Contracts\BankAccountInterface;
 use ComBank\Exceptions\InvalidOverdraftFundsException;
+use ComBank\Exceptions\ZeroAmountException;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class WithdrawTransaction extends BaseTransaction implements BankTransactionInterface 
@@ -21,8 +22,16 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
     public function applyTransaction(BankAccountInterface $account): float
     {
         $newBalance = $account->getBalance() - $this->getAmount();
-    if (!$account->getOverdraft()->isGrantOverdraftFunds($newBalance)) {
-            throw new InvalidOverdraftFundsException("Insufficient funds and overdraft not allowed.");
+        if ($newBalance < 0.0) {
+            $overdraftFunds = $account->getOverdraft()->getOverdraftFundsAmount();
+
+            if ($overdraftFunds <= 0.0) {
+                throw new InvalidOverdraftFundsException('Insufficient balance to complete the withdrawal.');
+            }
+
+            if ($newBalance < -$overdraftFunds) {
+                throw new InvalidOverdraftFundsException('Withdrawal exceeds overdraft limit.');
+            }
         }
         return $newBalance;
     }

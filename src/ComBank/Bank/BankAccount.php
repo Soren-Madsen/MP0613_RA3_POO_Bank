@@ -64,11 +64,13 @@ class BankAccount implements BankAccountInterface
     public function transaction(BankTransactionInterface $transaction): void
     {
         if (! $this->isOpen()) {
-            throw new BankAccountException('Account is closed.');
+            throw new BankAccountException('Account is now closed.');
         }
         try {
             $newBalance = $transaction->applyTransaction($this);
             $this->setBalance($newBalance);
+        } catch (ZeroAmountException $e) {
+            throw new FailedTransactionException($e->getMessage());
         } catch (InvalidOverdraftFundsException $e) {
             throw new FailedTransactionException($e->getMessage());
         }
