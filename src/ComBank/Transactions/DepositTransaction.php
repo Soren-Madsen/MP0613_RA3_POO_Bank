@@ -12,7 +12,7 @@ use ComBank\Transactions\Contracts\BankTransactionInterface;
 
 class DepositTransaction extends BaseTransaction implements BankTransactionInterface
 {
-      public function __construct(float $amount)
+    public function __construct(float $amount)
     {
         parent::__construct($amount);
     }
@@ -23,7 +23,7 @@ class DepositTransaction extends BaseTransaction implements BankTransactionInter
     }
     public function getTransactionInfo(): string
     {
-        return "Deposit of amount: " . $this->getAmount();
+    return 'DEPOSIT_TRANSACTION';
     }
    
 }

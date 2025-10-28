@@ -20,11 +20,15 @@ class WithdrawTransaction extends BaseTransaction implements BankTransactionInte
 
     public function applyTransaction(BankAccountInterface $account): float
     {
-        return $account->getBalance() - $this->getAmount();
+        $newBalance = $account->getBalance() - $this->getAmount();
+    if (!$account->getOverdraft()->isGrantOverdraftFunds($newBalance)) {
+            throw new InvalidOverdraftFundsException("Insufficient funds and overdraft not allowed.");
+        }
+        return $newBalance;
     }
     public function getTransactionInfo(): string
     {
-        return "Withdrawal of amount: " . $this->getAmount();
+    return 'WITHDRAW_TRANSACTION';
     }
    
 }

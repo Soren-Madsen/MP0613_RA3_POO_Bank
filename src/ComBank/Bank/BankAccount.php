@@ -1,4 +1,6 @@
-<?php namespace ComBank\Bank;
+<?php
+
+namespace ComBank\Bank;
 
 /**
  * Created by VS Code.
@@ -15,6 +17,7 @@ use ComBank\Bank\Contracts\BankAccountInterface;
 use ComBank\Exceptions\FailedTransactionException;
 use ComBank\Exceptions\InvalidOverdraftFundsException;
 use ComBank\OverdraftStrategy\Contracts\OverdraftInterface;
+use ComBank\OverdraftStrategy\SilverOverdraft;
 use ComBank\Support\Traits\AmountValidationTrait;
 use ComBank\Transactions\Contracts\BankTransactionInterface;
 
@@ -22,16 +25,22 @@ class BankAccount implements BankAccountInterface
 {
     private $balance;
     private $status;
+    private $overdraft;
 
     public function __construct(float $initialBalance = 0.0)
     {
         $this->balance = $initialBalance;
         $this->status = BankAccountInterface::STATUS_OPEN;
-
+        $this->overdraft = new NoOverdraft();
     }
     public function isOpen(): bool
     {
         return $this->status === BankAccountInterface::STATUS_OPEN;
+    }
+    
+    public function getOverdraft(): OverdraftInterface
+    {
+        return $this->overdraft;
     }
     public function getBalance(): float
     {
@@ -43,21 +52,31 @@ class BankAccount implements BankAccountInterface
     }
     public function reopenAccount()
     {
+        if ($this->isOpen()) {
+            throw new BankAccountException('Account is already open.');
+        }
         $this->status = BankAccountInterface::STATUS_OPEN;
     }
     public function closeAccount()
     {
         $this->status = BankAccountInterface::STATUS_CLOSED;
     }
-    public function transaction(BankTransactionInterface $transaction) : void
+    public function transaction(BankTransactionInterface $transaction): void
     {
-    if (! $this->isOpen()) {
-    }
+        if (! $this->isOpen()) {
+            throw new BankAccountException('Account is closed.');
+        }
         try {
             $newBalance = $transaction->applyTransaction($this);
-    $this->setBalance( $newBalance);
-    } catch (FailedTransactionException $e) {
-            throw new BankAccountException("Transaction failed: " . $e->getMessage());
+            $this->setBalance($newBalance);
+        } catch (InvalidOverdraftFundsException $e) {
+            throw new FailedTransactionException($e->getMessage());
         }
+    }
+    public function applyOverdraft(OverdraftInterface $overdraft): void
+    {
+         if (! $this->isOpen()) {
+        } 
+        $this->overdraft = $overdraft;
     }
 }
